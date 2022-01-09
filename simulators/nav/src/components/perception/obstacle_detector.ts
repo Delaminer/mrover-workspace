@@ -51,6 +51,9 @@ export default class ObstacleDetector {
   /* distance to the (closest) obstacle */
   private obsDist = -1; /* meters */
 
+  /* reference to the (closest) obstacle */
+  private closestObstacle!:Obstacle; /* meters */
+
   /* list of all obstacles on field */
   private obstacles!:Obstacle[];
 
@@ -65,6 +68,9 @@ export default class ObstacleDetector {
 
   /* location of the ZED (i.e. rover's eyes) */
   private zedOdom!:Odom;
+
+  /* Blank odometry for using relative headings instead of absolute */
+  private blankOdom!:Odom;
 
   /************************************************************************************************
    * Public Methods
@@ -87,6 +93,15 @@ export default class ObstacleDetector {
     this.obstacles = obstacles;
     this.scale = scale;
 
+    // Create a blank odom
+    this.blankOdom = {} as Odom;
+    this.blankOdom.bearing_deg = 0;
+    this.blankOdom.latitude_deg = 0;
+    this.blankOdom.latitude_min = 0;
+    this.blankOdom.longitude_deg = 0;
+    this.blankOdom.longitude_min = 0;
+    this.blankOdom.speed = 0;
+
     this.updateZedOdom();
   } /* constructor() */
 
@@ -104,6 +119,7 @@ export default class ObstacleDetector {
     obsMsg = this.isPathClear(this.zedOdom.bearing_deg);
     if (obsMsg !== null) {
       obsMsg.distance = -1;
+      console.log(`Step 3 returned, data=${JSON.stringify(obsMsg)}`);
       return obsMsg;
     }
 
@@ -153,31 +169,38 @@ export default class ObstacleDetector {
       if (openInterval[1] - openInterval[0] < minIntervalSize) {
         break;
       }
+      console.log(`interval=${JSON.stringify(openInterval)}, pathWidth=${pathWdth}`);
 
       /* Step 5b: Search through sub-intervals of size minIntervalSize within openInterval. */
-      /* If interval is to the right, search sub-intervals left to right */
+      /* If interval is to the left, search sub-intervals right (the middle) to left */
       if ((openInterval[0] + openInterval[1]) / 2 > 0) {
         for (let start:number = openInterval[0]; /* relative degrees */
           start <= openInterval[1] - minIntervalSize;
           start += 1) {
           const end:number = start + minIntervalSize; /* relative degrees */
-          const angle = start + (end / 2); /* relative degrees */
+          const angle = start + (minIntervalSize / 2); /* relative degrees */
           obsMsg = this.isPathClear(compassModDeg(this.zedOdom.bearing_deg + angle));
           if (obsMsg !== null) {
+            obsMsg.bearing = start;
+            obsMsg.rightBearing = end;
+            console.log(obsMsg);
             return obsMsg;
           }
         }
       }
 
-      /* If interval is to the left, search sub-intervals right to left */
+      /* If interval is to the right, search sub-intervals left (the middle) to right */
       else {
         for (let end:number = openInterval[1]; /* relative degrees */
           end >= openInterval[0] + minIntervalSize;
           end -= 1) {
           const start:number = end - minIntervalSize; /* relative degrees */
-          const angle = start + (end / 2); /* relative degrees */
+          const angle = start + (minIntervalSize / 2); /* relative degrees */
           obsMsg = this.isPathClear(compassModDeg(this.zedOdom.bearing_deg + angle));
           if (obsMsg !== null) {
+            obsMsg.bearing = start;
+            obsMsg.rightBearing = end;
+            console.log(obsMsg);
             return obsMsg;
           }
         }
@@ -188,36 +211,14 @@ export default class ObstacleDetector {
     }
 
     /* Step 6: If no intervals work, pick left or right edge of field of view */
-    let angle!:number;
+    const leftAngle:number = intervalHeap.minOccupied - (minIntervalSize / 2);
+    const rightAngle:number = intervalHeap.maxOccupied + (minIntervalSize / 2);
 
-    /* If left side has more open, go left of fov */
-    if (intervalHeap.minOccupied > 0) {
-      angle = intervalHeap.minOccupied - (minIntervalSize / 2);
-    }
-
-    /* If right side has more open, go right of fov */
-    else if (intervalHeap.maxOccupied < 0) {
-      angle = intervalHeap.maxOccupied + (minIntervalSize / 2);
-    }
-
-    /* If right side has more open, go right of fov */
-    else if (Math.abs(intervalHeap.minOccupied) > intervalHeap.maxOccupied) {
-      angle = intervalHeap.maxOccupied + (minIntervalSize / 2);
-    }
-
-    /* If left side has more open, go left of fov */
-    else if (Math.abs(intervalHeap.minOccupied) < intervalHeap.maxOccupied) {
-      angle = intervalHeap.minOccupied - (minIntervalSize / 2);
-    }
-
-    /* If both sides equally occupied, randomly go right of fov */
-    else {
-      angle = intervalHeap.maxOccupied + (minIntervalSize / 2);
-    }
-
+    console.log(`Step 6 returned. LA=${leftAngle}, RA=${rightAngle}, dist=${this.obsDist}`);
     return {
       distance: this.obsDist,
-      bearing: angle
+      bearing: leftAngle,
+      rightBearing: rightAngle
     };
   } /* computeObsMsg() */
 
@@ -265,6 +266,7 @@ export default class ObstacleDetector {
       dist -= obs.size / 2;
       if (dist < minDist) {
         minDist = dist;
+        this.closestObstacle = obs;
       }
     }
 
@@ -282,15 +284,20 @@ export default class ObstacleDetector {
   /* Does there appear to be a clear path in the direction of angle (angle is
      in degrees from north)? */
   private isPathClear(angle:number):ObstacleMessage|null {
+    console.log(`There are ${this.visibleObstacles.length} visible obstacles`);
     for (let i = 0; i < this.visibleObstacles.length; i += 1) {
       if (this.isObsInPath(this.visibleObstacles[i], angle)) {
+        console.log('The obstacle is in the path.');
         return null;
       }
     }
+    console.log('No obstacle in the path.');
 
+    // Return default obstacle message for a clear path (distance = -1, bearing = 0)
     return {
-      distance: this.obsDist, /* Will be -1 if okay to go straight ahead (i.e. bearing = 0) */
-      bearing: calcRelativeBearing(this.zedOdom.bearing_deg, angle)
+      distance: -1, /* Will be -1 if okay to go straight ahead (i.e. bearing = 0) */
+      bearing: 0.0,
+      rightBearing: 0.0
     };
   } /* isPathClear() */
 

@@ -9,7 +9,7 @@
 </template>
 
 
-<!-------------------------------------------- Script --------------------------------------------->
+<!-------------------------------------------- Script -------------------------------------------->
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import { Getter, Mutation } from 'vuex-class';

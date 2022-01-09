@@ -18,7 +18,7 @@
 </template>
 
 
-<!-------------------------------------------- Script --------------------------------------------->
+<!-------------------------------------------- Script ------------------------------------------>
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { Getter } from 'vuex-class';

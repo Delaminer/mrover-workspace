@@ -41,7 +41,7 @@
 </template>
 
 
-<!-------------------------------------------- Script --------------------------------------------->
+<!-------------------------------------------- Script -------------------------------------------->
 <script lang="ts">
 import fnvPlus from 'fnv-plus';
 import { Component, Vue, Watch } from 'vue-property-decorator';

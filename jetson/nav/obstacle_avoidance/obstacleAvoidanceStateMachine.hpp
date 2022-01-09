@@ -9,7 +9,8 @@ class StateMachine;
 // obstacle avoidance algorithms
 enum class ObstacleAvoidanceAlgorithm
 {
-    SimpleAvoidance
+    SimpleAvoidance,
+    DoubleSidedAvoidance
 };
 
 // This class is the base class for the logic of the obstacle avoidance state machine 
@@ -23,11 +24,11 @@ public:
 
     virtual ~ObstacleAvoidanceStateMachine() {}
 
-    void updateObstacleAngle( double bearing );
+    void updateObstacleAngle( double leftBearing, double rightBearing );
 
     void updateObstacleDistance( double distance );
 
-    void updateObstacleElements( double bearing, double distance );  
+    void updateObstacleElements( double leftBearing, double rightBearing, double distance );  
 
     NavState run();
 
@@ -52,8 +53,14 @@ protected:
     // Odometry point used when avoiding obstacles.
     Odometry mObstacleAvoidancePoint;
 
-    // Initial angle to go around obstacle upon detection.
+    // // Initial angle to go around obstacle upon detection.
     double mOriginalObstacleAngle;
+
+    // Initial angle of obstacle's left side
+    double mOriginalObstacleLeftAngle;
+
+    // Initial angle of obstacle's right side
+    double mOriginalObstacleRightAngle;
 
     // Initial angle to go around obstacle upon detection.
     double mOriginalObstacleDistance;
@@ -63,6 +70,11 @@ protected:
 
     // Last obstacle angle for consecutive angles
     double mLastObstacleAngle;
+
+    // Last obstacle left angle for consecutive angles
+    double mLastObstacleLeftAngle;
+    // Last obstacle right angle for consecutive angles
+    double mLastObstacleRightAngle;
 
     // Pointer to rover object
     Rover* mRover;

@@ -8,12 +8,13 @@
       <legend>Obstacle</legend>
       <p>Distance: {{ dist }} m</p>
       <p>Bearing: {{ bear }}º</p>
+      <p>Right Bearing: {{ bearRight }}º</p>
     </fieldset>
   </div>
 </template>
 
 
-<!-------------------------------------------- Script --------------------------------------------->
+<!-------------------------------------------- Script ------------------------------------------>
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { Getter } from 'vuex-class';
@@ -39,6 +40,11 @@ export default class ObstacleLCM extends Vue {
 
   /* bearing to turn to in the obstacle message LCM */
   private get bear():number {
+    return Number(this.obstacleMessage.bearing.toFixed(2));
+  }
+
+  /* bearing to turn to in the obstacle message LCM */
+  private get bearRight():number {
     return Number(this.obstacleMessage.bearing.toFixed(2));
   }
 }

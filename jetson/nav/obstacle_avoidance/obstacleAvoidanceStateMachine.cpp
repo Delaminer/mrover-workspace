@@ -3,6 +3,7 @@
 #include "utilities.hpp"
 #include "stateMachine.hpp"
 #include "simpleAvoidance.hpp"
+#include "doubleSidedAvoidance.hpp"
 #include <cmath>
 #include <iostream>
 
@@ -15,9 +16,14 @@ ObstacleAvoidanceStateMachine::ObstacleAvoidanceStateMachine( StateMachine* stat
 
 // Allows outside objects to set the original obstacle angle
 // This will allow the variable to be set before the rover turns
-void ObstacleAvoidanceStateMachine::updateObstacleAngle( double bearing )
+void ObstacleAvoidanceStateMachine::updateObstacleAngle( double leftBearing, double rightBearing )
 {
-    mOriginalObstacleAngle = bearing;
+    // Some code still uses only one angle, so still update it
+    mOriginalObstacleAngle = leftBearing;
+
+    //Update each sides of the angle
+    mOriginalObstacleLeftAngle = leftBearing;
+    mOriginalObstacleRightAngle = rightBearing;
 }
 
 // Allows outside objects to set the original obstacle distance
@@ -29,9 +35,10 @@ void ObstacleAvoidanceStateMachine::updateObstacleDistance( double distance )
 
 // Allows outside objects to set the original obstacle angle
 // This will allow the variable to be set before the rover turns
-void ObstacleAvoidanceStateMachine::updateObstacleElements( double bearing, double distance )
+void ObstacleAvoidanceStateMachine::updateObstacleElements( double leftBearing, 
+                                                        double rightBearing, double distance )
 {
-    updateObstacleAngle( bearing );
+    updateObstacleAngle( leftBearing, rightBearing );
     updateObstacleDistance( distance );
 }
 
@@ -81,6 +88,10 @@ ObstacleAvoidanceStateMachine* ObstacleAvoiderFactory ( StateMachine* roverState
     {
         case ObstacleAvoidanceAlgorithm::SimpleAvoidance:
             avoid = new SimpleAvoidance( roverStateMachine, rover, roverConfig );
+            break;
+
+        case ObstacleAvoidanceAlgorithm::DoubleSidedAvoidance:
+            avoid = new DoubleSidedAvoidance( roverStateMachine, rover, roverConfig );
             break;
 
         default:

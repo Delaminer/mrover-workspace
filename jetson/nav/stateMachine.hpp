@@ -42,10 +42,11 @@ public:
     void updateCompletedPoints( );
 
     void updateObstacleAngle( double bearing );
+    void updateObstacleAngle( double leftBearing, double rightBearing );
 
     void updateObstacleDistance( double distance );
 
-    void updateObstacleElements( double bearing, double distance );
+    void updateObstacleElements( double leftBearing, double rightBearing, double distance );
 
     void updateRepeaterComplete( );
 
@@ -84,6 +85,10 @@ private:
     string stringifyNavState() const;
 
     double getOptimalAvoidanceAngle() const;
+
+    double getOptimalAvoidanceAngleLeft() const;
+
+    double getOptimalAvoidanceAngleRight() const;
 
     double getOptimalAvoidanceDistance() const;
 

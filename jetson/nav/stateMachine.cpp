@@ -43,7 +43,7 @@ StateMachine::StateMachine( lcm::LCM& lcmObject )
     mRover = new Rover( mRoverConfig, lcmObject );
     mSearchStateMachine = SearchFactory( this, SearchType::SPIRALOUT, mRover, mRoverConfig );
     mGateStateMachine = GateFactory( this, mRover, mRoverConfig );
-    mObstacleAvoidanceStateMachine = ObstacleAvoiderFactory( this, ObstacleAvoidanceAlgorithm::SimpleAvoidance, mRover, mRoverConfig );
+    mObstacleAvoidanceStateMachine = ObstacleAvoiderFactory( this, ObstacleAvoidanceAlgorithm::DoubleSidedAvoidance, mRover, mRoverConfig );
 } // StateMachine()
 
 // Destructs the StateMachine object. Deallocates memory for the Rover
@@ -72,11 +72,19 @@ void StateMachine::updateRepeaterComplete( )
     return;
 }
 
+
 // Allows outside objects to set the original obstacle angle
 // This will allow the variable to be set before the rover turns
 void StateMachine::updateObstacleAngle( double bearing )
 {
-    mObstacleAvoidanceStateMachine->updateObstacleAngle( bearing );
+    mObstacleAvoidanceStateMachine->updateObstacleAngle( bearing, bearing );
+}
+
+// Allows outside objects to set the original obstacle angles
+// This will allow the variable to be set before the rover turns
+void StateMachine::updateObstacleAngle( double leftBearing, double rightBearing )
+{
+    mObstacleAvoidanceStateMachine->updateObstacleAngle( leftBearing, rightBearing );
 }
 
 // Allows outside objects to set the original obstacle angle
@@ -88,9 +96,9 @@ void StateMachine::updateObstacleDistance( double distance )
 
 // Allows outside objects to set the original obstacle angle
 // This will allow the variable to be set before the rover turns
-void StateMachine::updateObstacleElements( double bearing, double distance )
+void StateMachine::updateObstacleElements( double leftBearing, double rightBearing, double distance )
 {
-    updateObstacleAngle( bearing );
+    updateObstacleAngle( leftBearing, rightBearing );
     updateObstacleDistance( distance );
 }
 
@@ -394,8 +402,8 @@ NavState StateMachine::executeDrive()
 
     if( isObstacleDetected( mRover ) && !isWaypointReachable( distance ) && isObstacleInThreshold( mRover, mRoverConfig ) )
     {
-        mObstacleAvoidanceStateMachine->updateObstacleElements( getOptimalAvoidanceAngle(),
-                                                                getOptimalAvoidanceDistance() );
+        mObstacleAvoidanceStateMachine->updateObstacleElements( getOptimalAvoidanceAngleLeft(),
+                                        getOptimalAvoidanceAngleRight(), getOptimalAvoidanceDistance() );
         return NavState::TurnAroundObs;
     }
     DriveStatus driveStatus = mRover->drive( nextWaypoint.odom );
@@ -492,6 +500,19 @@ double StateMachine::getOptimalAvoidanceAngle() const
 {
     return mRover->roverStatus().obstacle().bearing;
 } // optimalAvoidanceAngle()
+
+// Returns the optimal angle to avoid the left side of the detected obstacle.
+double StateMachine::getOptimalAvoidanceAngleLeft() const
+{
+    return mRover->roverStatus().obstacle().bearing;
+} // optimalAvoidanceAngle()
+
+// Returns the optimal angle to avoid the right side of the detected obstacle.
+double StateMachine::getOptimalAvoidanceAngleRight() const
+{
+    return mRover->roverStatus().obstacle().rightBearing;
+} // optimalAvoidanceAngle()
+
 
 // Returns the optimal angle to avoid the detected obstacle.
 double StateMachine::getOptimalAvoidanceDistance() const
