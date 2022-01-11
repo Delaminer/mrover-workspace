@@ -1,0 +1,101 @@
+{
+  "arTags": [],
+  "canvasHeight": 1804,
+  "centerOdom": {
+    "latitude_deg": 38,
+    "latitude_min": 24.38,
+    "longitude_deg": -110,
+    "longitude_min": -47.51,
+    "bearing_deg": 0,
+    "speed": -1
+  },
+  "gates": [],
+  "obstacles": [
+    {
+      "odom": {
+        "latitude_deg": 38,
+        "latitude_min": 24.38477079144633,
+        "longitude_deg": -110,
+        "longitude_min": -47.51120235338419,
+        "bearing_deg": 0,
+        "speed": -1
+      },
+      "size": 3
+    },
+    {
+      "odom": {
+        "latitude_deg": 38,
+        "latitude_min": 24.383215423702183,
+        "longitude_deg": -110,
+        "longitude_min": -47.50914117615338,
+        "bearing_deg": 0,
+        "speed": -1
+      },
+      "size": 3
+    },
+    {
+      "odom": {
+        "latitude_deg": 38,
+        "latitude_min": 24.381689966876365,
+        "longitude_deg": -110,
+        "longitude_min": -47.508110587537544,
+        "bearing_deg": 0,
+        "speed": -1
+      },
+      "size": 3
+    },
+    {
+      "odom": {
+        "latitude_deg": 38,
+        "latitude_min": 24.37819038945193,
+        "longitude_deg": -110,
+        "longitude_min": -47.505629540869165,
+        "bearing_deg": 0,
+        "speed": -1
+      },
+      "size": 3
+    },
+    {
+      "odom": {
+        "latitude_deg": 38,
+        "latitude_min": 24.376784576298576,
+        "longitude_deg": -110,
+        "longitude_min": -47.50463712220096,
+        "bearing_deg": 0,
+        "speed": -1
+      },
+      "size": 3
+    },
+    {
+      "odom": {
+        "latitude_deg": 38,
+        "latitude_min": 24.37504974304531,
+        "longitude_deg": -110,
+        "longitude_min": -47.50337751389338,
+        "bearing_deg": 0,
+        "speed": -1
+      },
+      "size": 3
+    }
+  ],
+  "referencePoints": [],
+  "repeaterLoc": null,
+  "size": 25,
+  "waypoints": [
+    {
+      "gate": true,
+      "gate_width": 3,
+      "id": -1,
+      "odom": {
+        "latitude_deg": 38,
+        "latitude_min": 24.384381949510185,
+        "longitude_deg": -110,
+        "longitude_min": -47.506049410305025,
+        "bearing_deg": 0,
+        "speed": -1,
+        "type": "Odometry"
+      },
+      "search": true
+    }
+  ]
+}

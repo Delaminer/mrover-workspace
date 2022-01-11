@@ -45,7 +45,7 @@ export default class ObstacleLCM extends Vue {
 
   /* bearing to turn to in the obstacle message LCM */
   private get bearRight():number {
-    return Number(this.obstacleMessage.bearing.toFixed(2));
+    return Number(this.obstacleMessage.rightBearing.toFixed(2));
   }
 }
 </script>

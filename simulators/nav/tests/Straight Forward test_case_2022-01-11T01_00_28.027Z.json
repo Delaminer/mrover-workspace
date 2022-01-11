@@ -1,0 +1,57 @@
+{
+  "arTags": [],
+  "canvasHeight": 1804,
+  "centerOdom": {
+    "latitude_deg": 38,
+    "latitude_min": 24.38,
+    "longitude_deg": -110,
+    "longitude_min": -47.51,
+    "bearing_deg": 0,
+    "speed": -1
+  },
+  "gates": [],
+  "obstacles": [
+    {
+      "odom": {
+        "latitude_deg": 38,
+        "latitude_min": 24.38192925422129,
+        "longitude_deg": -110,
+        "longitude_min": -47.5076525481532,
+        "bearing_deg": 0,
+        "speed": -1
+      },
+      "size": 3
+    },
+    {
+      "odom": {
+        "latitude_deg": 38,
+        "latitude_min": 24.38282658176604,
+        "longitude_deg": -110,
+        "longitude_min": -47.5118512425135,
+        "bearing_deg": 0,
+        "speed": -1
+      },
+      "size": 3
+    }
+  ],
+  "referencePoints": [],
+  "repeaterLoc": null,
+  "size": 25,
+  "waypoints": [
+    {
+      "gate": true,
+      "gate_width": 3,
+      "id": -1,
+      "odom": {
+        "latitude_deg": 38,
+        "latitude_min": 24.385518564400286,
+        "longitude_deg": -110,
+        "longitude_min": -47.510248104666175,
+        "bearing_deg": 0,
+        "speed": -1,
+        "type": "Odometry"
+      },
+      "search": true
+    }
+  ]
+}

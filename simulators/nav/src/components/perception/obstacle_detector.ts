@@ -119,7 +119,6 @@ export default class ObstacleDetector {
     obsMsg = this.isPathClear(this.zedOdom.bearing_deg);
     if (obsMsg !== null) {
       obsMsg.distance = -1;
-      console.log(`Step 3 returned, data=${JSON.stringify(obsMsg)}`);
       return obsMsg;
     }
 
@@ -169,7 +168,6 @@ export default class ObstacleDetector {
       if (openInterval[1] - openInterval[0] < minIntervalSize) {
         break;
       }
-      console.log(`interval=${JSON.stringify(openInterval)}, pathWidth=${pathWdth}`);
 
       /* Step 5b: Search through sub-intervals of size minIntervalSize within openInterval. */
       /* If interval is to the left, search sub-intervals right (the middle) to left */
@@ -183,7 +181,6 @@ export default class ObstacleDetector {
           if (obsMsg !== null) {
             obsMsg.bearing = start;
             obsMsg.rightBearing = end;
-            console.log(obsMsg);
             return obsMsg;
           }
         }
@@ -200,7 +197,6 @@ export default class ObstacleDetector {
           if (obsMsg !== null) {
             obsMsg.bearing = start;
             obsMsg.rightBearing = end;
-            console.log(obsMsg);
             return obsMsg;
           }
         }
@@ -214,7 +210,6 @@ export default class ObstacleDetector {
     const leftAngle:number = intervalHeap.minOccupied - (minIntervalSize / 2);
     const rightAngle:number = intervalHeap.maxOccupied + (minIntervalSize / 2);
 
-    console.log(`Step 6 returned. LA=${leftAngle}, RA=${rightAngle}, dist=${this.obsDist}`);
     return {
       distance: this.obsDist,
       bearing: leftAngle,
@@ -284,14 +279,11 @@ export default class ObstacleDetector {
   /* Does there appear to be a clear path in the direction of angle (angle is
      in degrees from north)? */
   private isPathClear(angle:number):ObstacleMessage|null {
-    console.log(`There are ${this.visibleObstacles.length} visible obstacles`);
     for (let i = 0; i < this.visibleObstacles.length; i += 1) {
       if (this.isObsInPath(this.visibleObstacles[i], angle)) {
-        console.log('The obstacle is in the path.');
         return null;
       }
     }
-    console.log('No obstacle in the path.');
 
     // Return default obstacle message for a clear path (distance = -1, bearing = 0)
     return {
