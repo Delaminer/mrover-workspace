@@ -76,6 +76,9 @@ protected:
     // Last obstacle right angle for consecutive angles
     double mLastObstacleRightAngle;
 
+    // Last direction the rover turned
+    double mLastDirectionTurned;
+
     // Pointer to rover object
     Rover* mRover;
 

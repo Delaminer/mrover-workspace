@@ -35,7 +35,13 @@ void DoubleSidedAvoidance::DetermineSmallerAngle(double leftAngle, double rightA
     }
     else {
         // Turn to the angle closest to zero
-        if (fabs(leftAngle) < fabs(rightAngle)) {
+        if (fabs(leftAngle + rightAngle) < 0.1) {
+            // Perfectly in the middle - probably seeing both edges.
+            // Choose a side and stick with it
+            direction = mLastDirectionTurned;
+            smallerAngle = direction ? rightAngle : leftAngle;
+        }
+        else if (fabs(leftAngle) < fabs(rightAngle)) {
             // Left angle is smaller, turn there (left)
             direction = false; // left
             smallerAngle = leftAngle;
@@ -52,8 +58,10 @@ void DoubleSidedAvoidance::DetermineSmallerAngle(double leftAngle, double rightA
 // DoubleSidedAvoidance is abstracted from ObstacleAvoidanceStateMachine object so it creates an
 // ObstacleAvoidanceStateMachine object with the roverStateMachine, rover, and roverConfig. 
 // The DoubleSidedAvoidance object will execute the logic for the avoiding using the data from the two edges of an object
-DoubleSidedAvoidance::DoubleSidedAvoidance( StateMachine* roverStateMachine, Rover* rover, const rapidjson::Document& roverConfig )
-    : ObstacleAvoidanceStateMachine( roverStateMachine, rover, roverConfig ) {}
+DoubleSidedAvoidance::DoubleSidedAvoidance( StateMachine* roverStateMachine, Rover* rover, const rapidjson::Document& roverConfig,
+                                            double pathWidth_in, double bearingPathWidth_in )
+    : ObstacleAvoidanceStateMachine( roverStateMachine, rover, roverConfig ), 
+    pathWidth(pathWidth_in), bearingPathWidth(bearingPathWidth_in) {}
 
 // Destructs the DoubleSidedAvoidance object.
 DoubleSidedAvoidance::~DoubleSidedAvoidance() {}
@@ -74,7 +82,19 @@ NavState DoubleSidedAvoidance::executeTurnAroundObs( Rover* rover,
         // Determine which direction to turn (and corresponding angle)
         bool turnDirection;
         double turnHeading;
-        DetermineSmallerAngle( mOriginalObstacleLeftAngle, mOriginalObstacleRightAngle, turnDirection, turnHeading );
+        // Note: new data (from the simulator) returns an interval of open space.
+        // The actual rover might not provide this data, so use the old provided intervals.
+        bool openSpaceProvided = false;
+        if (openSpaceProvided) {
+            double openSpaceLeftBearing = rover->roverStatus().obstacle().bearing;
+            double openSpaceRightBearing = rover->roverStatus().obstacle().rightBearing;
+            DetermineSmallerAngle(openSpaceLeftBearing, openSpaceRightBearing, turnDirection, turnHeading );
+        }
+        else {
+            DetermineSmallerAngle(mLastObstacleLeftAngle, mLastObstacleRightAngle, turnDirection, turnHeading );
+            cout << "Working with " << mLastObstacleLeftAngle << ", " << mLastObstacleRightAngle << endl;
+        }
+        // double bearingAdjustment = ((direction? 1 : -1) * bearingPathWidth / 2);
         double distanceAroundObs = mOriginalObstacleDistance /
                                    cos( fabs( degreeToRadian( turnHeading ) ) );
         mObstacleAvoidancePoint = createAvoidancePoint( rover, turnHeading, distanceAroundObs );
@@ -85,30 +105,47 @@ NavState DoubleSidedAvoidance::executeTurnAroundObs( Rover* rover,
         mJustDetectedObstacle = false;
         return NavState::SearchDriveAroundObs;
     }
+
+    cout << "obs detected" <<endl;
     // An obstacle was detected
 
     // Get the bearing of the obstacle
     double obstacleLeftBearing = rover->roverStatus().obstacle().bearing;
     double obstacleRightBearing = rover->roverStatus().obstacle().rightBearing;
-    cout << "Received bearings (" << obstacleLeftBearing << ", " << obstacleRightBearing << ")" << endl;
+    double obstacleDistance = rover->roverStatus().obstacle().distance;
+    cout << "Obstacle (" << obstacleLeftBearing << ", " << obstacleRightBearing << ", " << obstacleDistance << ")";
+    cout << " Position (" << rover->roverStatus().odometry().bearing_deg << ") Width " << pathWidth << " / " << bearingPathWidth << endl;
     // Determine which smaller angle to use
     bool direction; //left=false, right=true
     double bearing;
     DetermineSmallerAngle(obstacleLeftBearing, obstacleRightBearing, direction, bearing);
+    cout << (direction?"right":"left");
+    cout << (direction?"right":"left");
+    // Adjust the bearing by the (bearing) path width so that the rover can rotate past the object
+    double bearingTest1 = 0*bearing + ((direction? 1 : -1) * bearingPathWidth / 0.9);
+    // Determine how much of an angle difference is needed 
+    double bearingTest2 = bearing + (direction? 1 : -1) * (
+        /* This here is the actual calculated change in angle, sin(offsetAngle) = clearance / distance */
+        asin((pathWidth / 2) / obstacleDistance) * 180 / 3.141592 /* Convert to degrees */
+    );
+    cout << "oops got (" << ((pathWidth / 2) / obstacleDistance) << ") ::: ";
+    cout << "Decided, we will turn " << (direction? "right":"left") << 
+        " with bearing " << bearing << " to either " << bearingTest1 << " or " << bearingTest2 << endl;
+    bearing = bearingTest1 * 1.0;
     
-    // Test:
-    direction = false;
-    bearing = obstacleLeftBearing;
-    double oldBearing = direction ? mLastObstacleRightAngle : mLastObstacleLeftAngle;
+    // // Test:
+    // direction = false;
+    // bearing = obstacleLeftBearing;
+    // double oldBearing = direction ? mLastObstacleRightAngle : mLastObstacleLeftAngle;
 
 
 
-    // If an obstacle was detected last frame and it moved from one side of the rover to the other, 
-    // restore the direction of the angle to the original
-    if( mJustDetectedObstacle &&
-        ( bearing < 0 ? oldBearing >= 0 : oldBearing < 0 ) ) {
-        bearing *= -1;
-    }
+    // // If an obstacle was detected last frame and it moved from one side of the rover to the other, 
+    // // restore the direction of the angle to the original
+    // if( mJustDetectedObstacle &&
+    //     ( bearing < 0 ? oldBearing >= 0 : oldBearing < 0 ) ) {
+    //     bearing *= -1;
+    // }
 
     // The bearing we want to have is our current bearing plus the bearing of the obstacle
     double desiredBearing = mod( rover->roverStatus().odometry().bearing_deg + bearing, 360 );
@@ -116,7 +153,10 @@ NavState DoubleSidedAvoidance::executeTurnAroundObs( Rover* rover,
     mJustDetectedObstacle = true;
     mLastObstacleLeftAngle = obstacleLeftBearing;
     mLastObstacleRightAngle = obstacleRightBearing;
+    mLastDirectionTurned = direction;
 
+    // desiredBearing *= 2;
+    cout << "I WILL Turn to " << desiredBearing << " / " << bearing << endl;
     rover->turn( desiredBearing );
     return rover->roverStatus().currentState();
 } // executeTurnAroundObs()

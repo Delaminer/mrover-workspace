@@ -149,7 +149,9 @@ void StateMachine::run()
             case NavState::RadioRepeaterDrive:
             case NavState::Drive:
             {
+                cout << "Driving, we are now ";
                 nextState = executeDrive();
+                cout << ((int)nextState)<<endl; 
                 break;
             }
 

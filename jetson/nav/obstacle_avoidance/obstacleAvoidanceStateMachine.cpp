@@ -90,10 +90,17 @@ ObstacleAvoidanceStateMachine* ObstacleAvoiderFactory ( StateMachine* roverState
             avoid = new SimpleAvoidance( roverStateMachine, rover, roverConfig );
             break;
 
-        case ObstacleAvoidanceAlgorithm::DoubleSidedAvoidance:
-            avoid = new DoubleSidedAvoidance( roverStateMachine, rover, roverConfig );
+        case ObstacleAvoidanceAlgorithm::DoubleSidedAvoidance: { //curly brackets are needed for variable initialization
+            // Get path width from the config file
+            double pathWidth = roverConfig["roverMeasurements"]["width"].GetDouble();
+            // Calculate bearing version of width using math (law of cosines)
+            double visionDistance = roverConfig["computerVision"]["visionDistance"].GetDouble();
+            double bearingPathWidth = acos(1.0 - (pathWidth * pathWidth / (2 * visionDistance * visionDistance)));
+            // Convert to degrees
+            bearingPathWidth *= 180 / 3.141592;
+            avoid = new DoubleSidedAvoidance( roverStateMachine, rover, roverConfig, pathWidth, bearingPathWidth );
             break;
-
+        }
         default:
             std::cerr << "Unkown Search Type. Defaulting to original\n";
             avoid = new SimpleAvoidance( roverStateMachine, rover, roverConfig );

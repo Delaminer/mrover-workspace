@@ -18,7 +18,7 @@ function intervalCompare(interval0:Interval, interval1:Interval):number {
 
 
 /* Type representing [size of interval, interval] pair. */
-type SizedInterval = [number, Interval];
+export type SizedInterval = [number, Interval];
 
 
 /* Comporator for SizedIntervals. Smaller intervals are less, breaking ties with
@@ -30,6 +30,15 @@ function sizedIntervalCompare(interval0:SizedInterval, interval1:SizedInterval):
   return interval0[0] - interval1[0];
 } /* sizedIntervalCompare() */
 
+
+// /* Function for finding an interval. Smaller intervals are less, breaking ties with
+//    intervalCompare. */
+//    function valueInInterval(interval:SizedInterval, value:number):boolean {
+//     if (interval0[0] interval1[0]) {
+//       return true;
+//     }
+//     return false;
+//   } /* sizedIntervalCompare() */
 
 /* Class for finding open intervals in a given range that has certain intervals
    that are occupied. */
@@ -151,4 +160,24 @@ export class OpenIntervalHeap {
     this.openIntervals.splice(0, 1);
     return openInterval;
   } /* getNextOpenInterval() */
+
+  /* Find the interval this bearing is located in. */
+  findIntervals(bearing:number):Interval|null {
+    // Check if this bearing is open or closed
+    const find = function find(interval:SizedInterval):boolean {
+      return interval[1][0] < bearing && interval[1][1] > bearing;
+    };
+    const intervalIndex:number = this.openIntervals.findIndex(find);
+
+    if (intervalIndex > -1) {
+      return this.openIntervals[intervalIndex][1];
+    }
+
+    return null;
+  } /* findIntervals */
+
+  /* Get the open intervals */
+  getOpenIntervals():SizedInterval[] {
+    return this.openIntervals;
+  }
 }
