@@ -145,7 +145,6 @@ export default class ObstacleDetector {
         const ratio:number = Math.max(-1, Math.min(1, numerator / denominator));
         const deltaBear:number = radToDeg(Math.abs(Math.acos(ratio)));
         closedIntervals.push([relBear - deltaBear, relBear + deltaBear]);
-        console.log(`Delta bearing for object ${JSON.stringify(obs)}, db=${deltaBear}, rb=${relBear}, ans=${JSON.stringify(closedIntervals[closedIntervals.length - 1])}`);
       }
       else {
         /* If distance to obstacle is 0, it would cover our entire field of
@@ -166,6 +165,11 @@ export default class ObstacleDetector {
     /* The current path is not clear, so return the closed interval directly in front of us */
 
     const openIntervals:SizedInterval[] = intervalHeap.getOpenIntervals();
+
+    const convert = function find(interval:SizedInterval):string {
+      return JSON.stringify(interval[1]);
+    };
+    console.log(openIntervals.map(convert).join(' '));
 
     const obstacleInterval:Interval = [0, 0];
     let foundObstacle = false;
@@ -293,6 +297,7 @@ export default class ObstacleDetector {
           closedIntervals.push([relBear - deltaBear, relBear + deltaBear]);
 
           // This is in the field of view, so update distance
+          console.log(`Updated distance from ${distance} to ${dist - (obs.size / 2)} / ${dist}`);
           distance = dist - (obs.size / 2);
         }
       }
@@ -300,8 +305,8 @@ export default class ObstacleDetector {
 
     return {
       distance, /* Will be -1 if okay to go straight ahead (i.e. bearing = 0) */
-      bearing: obstacleInterval[0],
-      rightBearing: obstacleInterval[1]
+      bearing: obstacleInterval[0] - minIntervalSize,
+      rightBearing: obstacleInterval[1] + minIntervalSize
     };
 
     // let openInterval:Interval|null = intervalHeap.getNextOpenInterval();
