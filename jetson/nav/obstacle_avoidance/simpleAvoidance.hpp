@@ -9,7 +9,8 @@
 class SimpleAvoidance : public ObstacleAvoidanceStateMachine
 {
 public:
-    SimpleAvoidance( StateMachine* roverStateMachine, Rover* rover, const rapidjson::Document& roverConfig );
+    SimpleAvoidance( StateMachine* roverStateMachine, Rover* rover, const rapidjson::Document& roverConfig, 
+                            double pathWidth_in, double bearingPathWidth_in );
 
     ~SimpleAvoidance();
 
@@ -20,6 +21,15 @@ public:
 
 
     Odometry createAvoidancePoint( Rover* rover, const double distance );
+
+private:
+    // Helper function: Determine which angle is closer to 0
+    void DetermineSmallerAngle( double leftAngle, double rightAngle, bool &direction, double &smallerAngle);
+    // The width of the rover's path, for determining if it can drive past an obstacle
+    double pathWidth;
+    // The width of the rover's path, in degrees. This determines the change in bearing in which
+    // the rover can drive through (if they detect a hole, we know if we can fit through)
+    double bearingPathWidth;
 };
 
 #endif //SIMPLE_AVOIDANCE_HPP

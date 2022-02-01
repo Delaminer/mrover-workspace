@@ -157,19 +157,14 @@ export default class ObstacleDetector {
 
     /* Step 5: Pick biggest interval that rover can fit through */
     /* path width = rover width + 0.25 meters on each side */
-    const pathWdth = ROVER.width + (2 * OBS_PAD); /* meters */
+    // const pathWdth = ROVER.width + (2 * OBS_PAD); /* meters */
 
     /* degrees */
-    const minIntervalSize:number = 2 * radToDeg(Math.asin(pathWdth / 2 / this.fov.depth));
+    // const minIntervalSize:number = 2 * radToDeg(Math.asin(pathWdth / 2 / this.fov.depth));
 
     /* The current path is not clear, so return the closed interval directly in front of us */
 
     const openIntervals:SizedInterval[] = intervalHeap.getOpenIntervals();
-
-    const convert = function find(interval:SizedInterval):string {
-      return JSON.stringify(interval[1]);
-    };
-    console.log(openIntervals.map(convert).join(' '));
 
     const obstacleInterval:Interval = [0, 0];
     let foundObstacle = false;
@@ -199,15 +194,16 @@ export default class ObstacleDetector {
           foundObstacle = true;
         }
 
-        // the open interval covers! Can the rover pass through
-        else if (interval[0] < -minIntervalSize / 2 && minIntervalSize / 2 < interval[1]) {
-          // There is an entry! Return the clear path
-          return {
-            distance: -1,
-            bearing: interval[0],
-            rightBearing: interval[1]
-          };
-        }
+        // // the open interval covers! Can the rover pass through
+        // else if (interval[0] < -minIntervalSize / 2 && minIntervalSize / 2 < interval[1]) {
+        //   // There is an entry. Do not return a clear path, return the closest defining obstacle
+
+        //   return {
+        //     distance: -1,
+        //     bearing: interval[0],
+        //     rightBearing: interval[1]
+        //   };
+        // }
 
         // The interval is not large enough, return a nearby obstacle that is close.
         else if (Math.abs(interval[0]) > Math.abs(interval[1])) {
@@ -297,7 +293,6 @@ export default class ObstacleDetector {
           closedIntervals.push([relBear - deltaBear, relBear + deltaBear]);
 
           // This is in the field of view, so update distance
-          console.log(`Updated distance from ${distance} to ${dist - (obs.size / 2)} / ${dist}`);
           distance = dist - (obs.size / 2);
         }
       }
@@ -305,8 +300,8 @@ export default class ObstacleDetector {
 
     return {
       distance, /* Will be -1 if okay to go straight ahead (i.e. bearing = 0) */
-      bearing: obstacleInterval[0] - minIntervalSize,
-      rightBearing: obstacleInterval[1] + minIntervalSize
+      bearing: obstacleInterval[0],
+      rightBearing: obstacleInterval[1]
     };
 
     // let openInterval:Interval|null = intervalHeap.getNextOpenInterval();

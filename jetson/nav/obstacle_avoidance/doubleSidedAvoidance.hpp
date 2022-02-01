@@ -18,7 +18,6 @@ public:
     NavState executeDriveAroundObs( Rover* rover, const rapidjson::Document& roverConfig );
 
 
-    Odometry createAvoidancePoint( Rover* rover, const double bearing, const double distance );
     Odometry createAvoidancePoint( Rover* rover, const double distance );
 
 private:
