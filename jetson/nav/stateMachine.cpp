@@ -43,7 +43,7 @@ StateMachine::StateMachine( lcm::LCM& lcmObject )
     mRover = new Rover( mRoverConfig, lcmObject );
     mSearchStateMachine = SearchFactory( this, SearchType::SPIRALOUT, mRover, mRoverConfig );
     mGateStateMachine = GateFactory( this, mRover, mRoverConfig );
-    mObstacleAvoidanceStateMachine = ObstacleAvoiderFactory( this, ObstacleAvoidanceAlgorithm::DoubleSidedAvoidance, mRover, mRoverConfig );
+    mObstacleAvoidanceStateMachine = ObstacleAvoiderFactory( this, ObstacleAvoidanceAlgorithm::SimpleAvoidance, mRover, mRoverConfig );
 } // StateMachine()
 
 // Destructs the StateMachine object. Deallocates memory for the Rover
