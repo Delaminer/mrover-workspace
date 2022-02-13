@@ -152,15 +152,15 @@ Odometry calcCarrot(Rover* rover, const Odometry& c1, const Odometry& c2, bool& 
 
     // TODO find the distance dy from the rover to the intersect of line L
     double dy = estimateNoneuclid(rover->roverStatus().odometry(), intersectPt);
-    // cout << "rover Odometry latDeg " << rover->roverStatus().odometry().latitude_deg << "\n";
-    // cout << "rover Odometry latMin " << rover->roverStatus().odometry().latitude_min << "\n";
-    // cout << "rover Odometry lonDeg " << rover->roverStatus().odometry().longitude_deg << "\n";
-    // cout << "rover Odometry lonMin " << rover->roverStatus().odometry().longitude_min << "\n";
+    //  cout << "rover Odometry latDeg " << rover->roverStatus().odometry().latitude_deg << "\n";
+    //  cout << "rover Odometry latMin " << rover->roverStatus().odometry().latitude_min << "\n";
+    //  cout << "rover Odometry lonDeg " << rover->roverStatus().odometry().longitude_deg << "\n";
+    //  cout << "rover Odometry lonMin " << rover->roverStatus().odometry().longitude_min << "\n";
 
-    // cout << "intersect Odometry latDeg " << intersectPt.latitude_deg << "\n";
-    // cout << "intersect Odometry latMin " << intersectPt.latitude_min << "\n";
-    // cout << "intersect Odometry lonDeg " << intersectPt.longitude_deg << "\n";
-    // cout << "intersect Odometry lonMin " << intersectPt.longitude_min << "\n";
+    //  cout << "intersect Odometry latDeg " << intersectPt.latitude_deg << "\n";
+    //  cout << "intersect Odometry latMin " << intersectPt.latitude_min << "\n";
+    //  cout << "intersect Odometry lonDeg " << intersectPt.longitude_deg << "\n";
+    //  cout << "intersect Odometry lonMin " << intersectPt.longitude_min << "\n";
 
     double threshold = 0.5;
     double dx;

@@ -337,19 +337,16 @@ NavState GateStateMachine::executeGateDriveThrough()
 
     std::streamsize ss = std::cout.precision();
     std::cout << std::setprecision(10);
-    std::cout << "c1 long "<< c1.getX() <<"\n";
-    std::cout << "c1 lat " << c1.getY() <<"\n";
-    std::cout << "c2 long "<< c2.getX() <<"\n";
-    std::cout << "c2 lat " << c2.getY() <<"\n";
+    // std::cout << "c1 long "<< c1.getX() <<"\n";
+    // std::cout << "c1 lat " << c1.getY() <<"\n";
+    // std::cout << "c2 long "<< c2.getX() <<"\n";
+    // std::cout << "c2 lat " << c2.getY() <<"\n";
     std::cout << std::setprecision(ss);
 
-    std::cout << "distance\n";
-    std::cout << "calcCarror start\n";
     bool turn;
     Odometry carrot = calcCarrot( mRover, centerPoint1, centerPoint2, turn );
     int bearing_to_carrot = calcBearing( mRover->roverStatus().odometry(), carrot );
     double distance = estimateNoneuclid( mRover->roverStatus().odometry(), centerPoint2 );
-    std::cout << "calcCarror end\n";
 
     std::cout << "bearing: " << bearing_to_carrot << " dist " << distance << "\n";
     DriveStatus driveStatus = DriveStatus::OnCourse;
@@ -359,7 +356,8 @@ NavState GateStateMachine::executeGateDriveThrough()
         bool finishedTurning = mRover->turn( carrot );
         if (finishedTurning) {
             // Finished turning, now drive to the point
-            // driveStatus = mRover->drive ( distance, bearing_to_carrot, false );
+            cout << "Finished turning do something\n";
+            driveStatus = mRover->drive ( distance, bearing_to_carrot, false );
         }
     }
     else {
@@ -367,7 +365,6 @@ NavState GateStateMachine::executeGateDriveThrough()
         driveStatus = mRover->drive( distance, bearing_to_carrot, false );
     }
 
-    std::cout << "Drive called\n";
 
     if( driveStatus == DriveStatus::Arrived )
     {

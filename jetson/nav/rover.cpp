@@ -154,7 +154,7 @@ DriveStatus Rover::drive( const double distance, const double bearing, const boo
     if( ( !target && distance < mRoverConfig[ "navThresholds" ][ "waypointDistance" ].GetDouble() ) ||
         ( target && distance < mRoverConfig[ "navThresholds" ][ "targetDistance" ].GetDouble() ) )
     {
-        cout<<"Rover::drive(" <<target<<") returned status Arrive as a result of a higher distance (" << distance << ") to threshold " << mRoverConfig[ "navThresholds" ][ "waypointDistance" ].GetDouble()<<endl;
+        cout<<"Rover::drive!(" <<target<<") returned status Arrive as a result of a higher distance (" << distance << ") to threshold " << mRoverConfig[ "navThresholds" ][ "waypointDistance" ].GetDouble()<<endl;
         return DriveStatus::Arrived;
     }
 
@@ -163,6 +163,7 @@ DriveStatus Rover::drive( const double distance, const double bearing, const boo
 
     if( fabs( destinationBearing - mRoverStatus.odometry().bearing_deg ) < mRoverConfig[ "navThresholds" ][ "drivingBearing" ].GetDouble() )
     {
+        cout<<"Keep driving\n";
         double distanceEffort = mDistancePid.update( -1 * distance, 0 );
         double turningEffort = mBearingPid.update( mRoverStatus.odometry().bearing_deg, destinationBearing );
         publishJoystick( distanceEffort, turningEffort, false );
@@ -193,6 +194,7 @@ void Rover::drive( const int direction, const double bearing )
 bool Rover::turn( Odometry& destination )
 {
     double bearing = calcBearing( mRoverStatus.odometry(), destination );
+    cout<<"Turn to bearing "<<bearing<<endl;
     return turn( bearing );
 } // turn()
 
